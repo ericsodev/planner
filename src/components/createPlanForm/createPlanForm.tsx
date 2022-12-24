@@ -7,13 +7,27 @@ import { Form, Formik } from "formik";
 import dayjs from "dayjs";
 import { useState } from "react";
 import DateStage from "./dateStage";
-import NameStage from "./nameStage";
+import NameStage from "./titleStage";
 import UserStage from "./userStage";
 import { MdOutlineNavigateNext, MdOutlineNavigateBefore } from "react-icons/md";
+import { trpc } from "../../utils/trpc";
+import { useSession } from "@/contexts/userContext";
+import { useRouter } from "next/router";
 
-// stage 2.1. add availability or skip
+interface FormState {
+  title: string;
+  startDate: Date;
+  endDate: Date;
+  user: string;
+  password?: string;
+}
 export default function CreatePlanForm() {
   const [stage, setStage] = useState(0);
+  const { login } = useSession();
+  const createMutation = trpc.plans.create.useMutation();
+  const addMember = trpc.plans.addMember.useMutation();
+  const router = useRouter();
+
   const onNext = () => {
     setStage((stage) => (stage < NUM_STAGES - 1 ? stage + 1 : stage));
   };
@@ -32,12 +46,42 @@ export default function CreatePlanForm() {
         return <></>;
     }
   };
+  const onSubmit = async (v: FormState) => {
+    await createMutation.mutate(
+      {
+        title: v.title,
+        startDate: v.startDate,
+        endDate: v.endDate,
+      },
+      {
+        onSuccess: (plan) => {
+          addMember.mutate(
+            {
+              name: v.user,
+              password: v.password,
+              dates: [],
+              planId: plan.id,
+            },
+            {
+              onSuccess: (member) => {
+                login({
+                  name: member.name,
+                  planId: member.planId,
+                });
+                router.push(`/plan/${plan.slug}/update`);
+              },
+            }
+          );
+        },
+      }
+    );
+  };
   return (
     <div className="flex h-full min-h-full grow flex-col items-center justify-center gap-16">
       <div className="flex w-1/4 basis-80 flex-col justify-between gap-2 rounded-lg bg-slate-200/70 px-10 py-6">
         <Formik
           initialValues={{
-            name: "untitled plan",
+            title: "untitled plan",
             startDate: new Date(),
             endDate: dayjs().add(1, "day").toDate(),
             startDateDisplay: dayjs().format("DD/MM/YYYY"),
@@ -49,11 +93,9 @@ export default function CreatePlanForm() {
           }}
           validate={validate}
           onSubmit={(values, { setSubmitting }) => {
-            setTimeout(() => {
-              alert(JSON.stringify(values, null, 2));
-
+            onSubmit(values).then(() => {
               setSubmitting(false);
-            }, 200);
+            });
           }}
         >
           {({ validateForm }) => (
@@ -84,6 +126,7 @@ export default function CreatePlanForm() {
                   )}
                   {stage === NUM_STAGES - 1 && (
                     <button
+                      disabled={createMutation.isLoading || addMember.isLoading}
                       type="submit"
                       className="ml-auto rounded-md bg-gray-300 py-1 px-4 text-lg text-gray-700"
                     >
@@ -100,21 +143,13 @@ export default function CreatePlanForm() {
   );
 }
 
-interface FormState {
-  name: string;
-  startDate: Date;
-  endDate: Date;
-  user: string;
-  password: string;
-}
 function validate(values: FormState) {
   const errors: any = {};
 
-  if (!values.name) errors.name = "provide a name for your plan";
+  if (!values.title) errors.title = "provide a name for your plan";
   if (dayjs(values.startDate).isAfter(dayjs(values.endDate), "day")) {
     errors.startDateDisplay = "the start date cannot be after the end date";
   }
   if (!values.user) errors.user = "provide a name for your user";
-  console.log("validating", errors);
   return errors;
 }

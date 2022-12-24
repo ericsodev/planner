@@ -1,8 +1,8 @@
 import React from "react";
-import Label from "../global/labelField";
+import Label from "../global/Form/labelField";
 import { Field, ErrorMessage } from "formik";
-import ErrorField from "../global/errorField";
-import DateField from "../global/dateField";
+import ErrorField from "../global/Form/errorField";
+import DateField from "../global/Form/dateField";
 
 interface Props {
   validate: any;

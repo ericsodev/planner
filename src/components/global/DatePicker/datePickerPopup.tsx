@@ -5,14 +5,8 @@ import DayCell from "./dayCell";
 import { MdOutlineNavigateNext, MdOutlineNavigateBefore } from "react-icons/md";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
-interface DatePickerPopupProps {
-  initialDate?: Date;
-  selectedDate: Date;
-  setSelectedDate: React.Dispatch<SetStateAction<Date>>;
-}
-
 const DOW_PREFIXES = ["S", "M", "T", "W", "T", "F", "S"];
-export default function DatePickerPopup(props: DatePickerPopupProps) {
+export default function DatePickerPopup(props: any) {
   const [parent, enableAnimations] = useAutoAnimate<HTMLDivElement>();
   const [shownMonth, setShownMonth] = useState<Date>(
     props.initialDate ?? new Date()
@@ -24,8 +18,6 @@ export default function DatePickerPopup(props: DatePickerPopupProps) {
     dayComponents.push(
       <DayCell
         key={`day-${i}`}
-        selectedDate={props.selectedDate}
-        setDate={props.setSelectedDate}
         date={dayjs(shownMonth)
           .set("date", i + 1)
           .toDate()}

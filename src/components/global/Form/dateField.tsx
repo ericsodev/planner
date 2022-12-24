@@ -1,4 +1,4 @@
-import useDatePicker from "./DatePicker/useDatePicker";
+import useDatePicker from "../DatePicker/useDatePicker";
 import { useField } from "formik";
 import dayjs from "dayjs";
 
@@ -8,9 +8,12 @@ export default function DateField(props: any) {
   const [field, meta, helpers] = useField(props.name.match(propNameRegex)[1]);
   const { setValue: setDisplayValue } = displayHelpers;
   const { setValue } = helpers;
-  const { component, open } = useDatePicker(meta.value, (d: Date) => {
-    setValue(d);
-    setDisplayValue(dayjs(d).format("DD/MM/YYYY"));
+  const { component, open } = useDatePicker({
+    initialDates: [meta.value as Date],
+    onChange: (d: Date[]) => {
+      setValue(d[0]);
+      setDisplayValue(dayjs(d[0]).format("DD/MM/YYYY"));
+    },
   });
   return (
     <>

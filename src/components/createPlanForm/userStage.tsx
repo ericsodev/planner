@@ -1,8 +1,8 @@
 import React from "react";
-import Label from "../global/labelField";
+import Label from "../global/Form/labelField";
 import { Field, ErrorMessage } from "formik";
-import ErrorField from "../global/errorField";
-import InputField from "../global/inputField";
+import ErrorField from "../global/Form/errorField";
+import InputField from "../global/Form/inputField";
 
 export default function UserStage() {
   return (

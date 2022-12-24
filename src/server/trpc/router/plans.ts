@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { prisma } from "../../db/client";
+import bcyrpt from "bcrypt";
 
 import { router, publicProcedure } from "../trpc";
 
@@ -15,6 +16,28 @@ export const plansRouter = router({
           },
           select: {
             id: true,
+            slug: true,
+            title: true,
+            startDate: true,
+            endDate: true,
+            createdAt: true,
+          },
+        });
+      } catch (e) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+    }),
+  getById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      try {
+        return await prisma.plan.findFirstOrThrow({
+          where: {
+            id: input.id,
+          },
+          select: {
+            id: true,
+            slug: true,
             title: true,
             createdAt: true,
           },
@@ -36,6 +59,16 @@ export const plansRouter = router({
         },
       });
     }),
+  getMember: publicProcedure
+    .input(z.object({ name: z.string(), planId: z.string() }))
+    .query(async ({ input }) => {
+      return await prisma.member.findFirst({
+        where: {
+          name: input.name,
+          planId: input.planId,
+        },
+      });
+    }),
   addMember: publicProcedure
     .input(
       z.object({
@@ -46,8 +79,33 @@ export const plansRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      await prisma.plan.findFirst({ where: { id: input.planId } });
       // TODO: create member and add to plan
+      let password = undefined;
+      if (input.password) {
+        password = await bcyrpt.hash(input.password, 10);
+      }
+      return await prisma.member.create({
+        data: {
+          planId: input.planId,
+          availableTimes: input.dates,
+          name: input.name,
+          password: password,
+        },
+      });
+      // await prisma.plan.update({
+      //   where: { id: input.planId },
+      //   data: {
+      //     member: {
+      //       create: [
+      //         {
+      //           name: input.name,
+      //           availableTimes: input.dates,
+      //           password: password,
+      //         },
+      //       ],
+      //     },
+      //   },
+      // });
     }),
   changeAvailability: publicProcedure
     .input(
