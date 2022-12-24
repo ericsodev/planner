@@ -13,10 +13,13 @@ const UpdatePage: NextPage = () => {
   const router = useRouter();
   const { slug } = router.query;
   const { session } = useSession();
-  if (!session) router.push(`/plan/${slug}/login`);
   const plan = trpc.plans.getBySlug.useQuery({
     slug: typeof slug === "string" ? slug : "",
   });
+  useEffect(() => {
+    if (!slug) router.push(`/`);
+    if (!session) router.push(`/plan/${slug}/login`);
+  }, [session, router, slug]);
 
   const member = trpc.plans.getMember.useQuery(
     {
