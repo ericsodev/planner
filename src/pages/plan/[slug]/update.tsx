@@ -11,6 +11,7 @@ Assume user has authenticated if user value is present
 */
 const UpdatePage: NextPage = () => {
   const router = useRouter();
+  const memberMutate = trpc.plans.changeAvailability.useMutation({});
   const { slug } = router.query;
   const { session } = useSession();
   const plan = trpc.plans.getBySlug.useQuery({
@@ -30,9 +31,6 @@ const UpdatePage: NextPage = () => {
       enabled: !!plan.data?.id,
     }
   );
-  const handleDateChange = (dates: Date[]) => {
-    return;
-  };
   const dateRange = plan.data
     ? generateDateRange(plan.data.startDate, plan.data.endDate)
     : [];
@@ -42,7 +40,6 @@ const UpdatePage: NextPage = () => {
     selectedDates,
   } = useDatePicker({
     initialDates: member.data?.availableTimes ?? [],
-    onChange: handleDateChange,
     multiSelect: true,
     highlightedDates: dateRange,
     selectableDates: dateRange,
@@ -50,16 +47,38 @@ const UpdatePage: NextPage = () => {
 
   const loading = member.isLoading || plan.isLoading;
   const error = member.isError || plan.isError;
+  const handleSubmit = () => {
+    if (!(member.data && plan.data)) return;
+    memberMutate.mutate(
+      {
+        dates: selectedDates,
+        memberId: member.data?.id,
+        planId: plan.data.id,
+      },
+      {
+        onSuccess: () => {
+          router.push(`/plan/${slug}`);
+        },
+      }
+    );
+  };
+
   return (
-    <div className="flex h-full min-h-screen flex-col items-center justify-center bg-slate-50">
+    <div className="flex h-full min-h-screen flex-col items-center justify-center gap-5 bg-slate-50">
       {error && <h1>error</h1>}
       {loading && <h1>loading</h1>}
       <h1>hi, {member.data?.name}</h1>
       <button
-        className="rounded-sm bg-gray-200 px-2 py-1 text-lg"
+        className="rounded-sm bg-gray-200 px-3 py-1.5 text-lg"
         onClick={open}
       >
         set times
+      </button>
+      <button
+        className="rounded-sm bg-green-200 px-3 py-1.5 text-lg"
+        onClick={handleSubmit}
+      >
+        submit
       </button>
       {DatePicker}
     </div>
