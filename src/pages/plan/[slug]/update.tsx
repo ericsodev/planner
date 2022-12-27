@@ -19,7 +19,7 @@ const UpdatePage: NextPage = () => {
   });
   useEffect(() => {
     if (!slug) router.push(`/`);
-    if (!session) router.push(`/plan/${slug}/login`);
+    if (!session) router.push(`/plan/${slug}/signUp`);
   }, [session, router, slug]);
 
   const member = trpc.plans.getMember.useQuery(

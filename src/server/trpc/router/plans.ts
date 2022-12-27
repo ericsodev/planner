@@ -21,6 +21,13 @@ export const plansRouter = router({
             startDate: true,
             endDate: true,
             createdAt: true,
+            member: {
+              select: {
+                availableTimes: true,
+                name: true,
+                id: true,
+              },
+            },
           },
         });
       } catch (e) {
@@ -126,7 +133,18 @@ export const plansRouter = router({
           code: "NOT_FOUND",
         });
       }
-      //   TODO: add password check with bcrypt
-      await prisma.member.update({ where: { id: input.memberId }, data: {} });
+      let authed = true;
+      if (member.password) {
+        authed = await bcyrpt.compare(input.password ?? "", member.password);
+      }
+      if (!authed) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      await prisma.member.update({
+        where: { id: input.memberId },
+        data: {
+          availableTimes: input.dates,
+        },
+      });
     }),
 });

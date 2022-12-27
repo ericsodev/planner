@@ -1,43 +1,27 @@
-import { useAutoAnimate } from "@formkit/auto-animate/react";
+import type { RouterOutputs } from "@/utils/trpc";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { Header } from "./header";
 import Day from "./day";
-import { trpc } from "@/utils/trpc";
+import { Header } from "./header";
 
-interface HighlightedDate {
-  day: Date;
-  style: string;
-}
+type Members = RouterOutputs["plans"]["getBySlug"]["member"];
 
 interface Props {
-  highlightedDates?: HighlightedDate[];
+  highlightedDates?: { [key: string]: string };
   initialDate?: Date;
   onClick?: (date: Date) => void;
 }
 
 const DOW_PREFIXES = ["S", "M", "T", "W", "T", "F", "S"];
-const highlightedClasses = {
-  0: "bg-green-50 text-green-700 hover:bg-green-200/70 focus:bg-green-100/90",
-  1: "bg-green-100 text-green-700 hover:bg-green-200/70 focus:bg-green-100/90",
-  2: "bg-green-200/70 text-green-700 hover:bg-green-200 focus:bg-green-200/60",
-  3: "bg-green-300/60 text-green-800 hover:bg-green-300/90 focus:bg-green-300/50",
-  4: "bg-green-400/60 text-green-300 hover:bg-green-400/70 focus:bg-green-400/90",
-  5: "bg-green-500/60 text-green-300 hover:bg-green-500/70 focus:bg-green-500/90",
-};
 export default function Calendar({
   initialDate,
   highlightedDates,
   onClick,
 }: Props): JSX.Element {
-  // const trpc = []
   const [month, setMonth] = useState<Date>(initialDate ?? new Date());
-  const [parent, enableAnimations] = useAutoAnimate<HTMLDivElement>();
-  const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   const prevMonth = prevMonthHandler(setMonth);
   const nextMonth = nextMonthHandler(setMonth);
-
   return (
     <div className="">
       <Header
@@ -47,17 +31,14 @@ export default function Calendar({
         nextMonth={nextMonth}
       ></Header>
 
-      <div
-        className="grid w-full grid-cols-7 items-stretch justify-items-stretch gap-[2px] border-2 border-slate-100 bg-slate-100"
-        ref={parent}
-      >
+      <div className="grid w-full grid-cols-7 items-stretch justify-items-stretch gap-[2px] border-2 border-slate-100 bg-slate-100 transition-[height]">
         {
           // Day of week header
           DOW_PREFIXES.map((v, i) => {
             return (
               <div
                 key={`dow-${i}`}
-                className="bg-slate-50 text-center font-medium text-gray-500"
+                className="bg-slate-50 py-1 text-center font-medium text-gray-500"
               >
                 {v}
               </div>
@@ -76,15 +57,21 @@ export default function Calendar({
         {
           // Day cells
           Array.from({ length: dayjs(month).daysInMonth() }, (_, i) => {
-            const date = dayjs(month).startOf("month").add(i, "day").toDate();
+            const date = dayjs(month).startOf("month").add(i, "day");
             return (
               <Day
-                highlightedStyle={highlightedClasses[3]}
+                highlightedStyle={
+                  highlightedDates?.hasOwnProperty(
+                    date.startOf("day").toISOString()
+                  )
+                    ? highlightedDates[date.startOf("day").toISOString()]
+                    : undefined
+                }
                 key={`daycell-${i}`}
                 onClick={() => {
-                  if (onClick) onClick(date);
+                  if (onClick) onClick(date.toDate());
                 }}
-                date={date}
+                date={date.toDate()}
               ></Day>
             );
             // return <div></div>;
@@ -103,18 +90,7 @@ export default function Calendar({
     </div>
   );
 }
-function getHighlightedStyle(
-  availableMembers: number,
-  totalMembers: number
-): string | undefined {
-  const percent = (availableMembers / totalMembers) * 100;
-  if (availableMembers == 0) return highlightedClasses[0];
-  else if (0 < percent && percent <= 20) return highlightedClasses[1];
-  else if (20 < percent && percent <= 40) return highlightedClasses[2];
-  else if (40 < percent && percent <= 60) return highlightedClasses[3];
-  else if (60 < percent && percent <= 80) return highlightedClasses[4];
-  else return highlightedClasses[5];
-}
+
 const prevMonthHandler = (
   setState: React.Dispatch<React.SetStateAction<Date>>
 ): (() => void) => {
