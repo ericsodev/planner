@@ -65,8 +65,9 @@ export default function CreatePlanForm() {
             {
               onSuccess: (member) => {
                 login({
-                  name: member.name,
+                  name: member.user,
                   planId: member.planId,
+                  jwt: member.jwt,
                 });
                 router.push(`/plan/${plan.slug}/update`);
               },

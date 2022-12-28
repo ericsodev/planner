@@ -11,7 +11,7 @@ Assume user has authenticated if user value is present
 */
 const UpdatePage: NextPage = () => {
   const router = useRouter();
-  const memberMutate = trpc.plans.changeAvailability.useMutation({});
+  const memberMutate = trpc.plans.changeAvailability.useMutation();
   const { slug } = router.query;
   const { session } = useSession();
   const plan = trpc.plans.getBySlug.useQuery({
@@ -28,7 +28,7 @@ const UpdatePage: NextPage = () => {
       planId: session?.planId || "",
     },
     {
-      enabled: !!plan.data?.id,
+      enabled: !!plan.data,
     }
   );
   const dateRange = plan.data
@@ -48,12 +48,16 @@ const UpdatePage: NextPage = () => {
   const loading = member.isLoading || plan.isLoading;
   const error = member.isError || plan.isError;
   const handleSubmit = () => {
+    console.log(session);
+    console.log(member.data);
+    console.log(plan.data);
     if (!(member.data && plan.data)) return;
     memberMutate.mutate(
       {
         dates: selectedDates,
         memberId: member.data?.id,
         planId: plan.data.id,
+        jwt: session?.jwt,
       },
       {
         onSuccess: () => {
@@ -64,22 +68,26 @@ const UpdatePage: NextPage = () => {
   };
 
   return (
-    <div className="flex h-full min-h-screen flex-col items-center justify-center gap-5 bg-slate-50">
+    <div className="flex h-full min-h-screen flex-col items-center justify-center gap-5 self-center bg-slate-50">
       {error && <h1>error</h1>}
       {loading && <h1>loading</h1>}
-      <h1>hi, {member.data?.name}</h1>
-      <button
-        className="rounded-sm bg-gray-200 px-3 py-1.5 text-lg"
-        onClick={open}
-      >
-        set times
-      </button>
-      <button
-        className="rounded-sm bg-green-200 px-3 py-1.5 text-lg"
-        onClick={handleSubmit}
-      >
-        submit
-      </button>
+      <div className="grid grid-cols-1 gap-4">
+        <h1 className="text-center text-gray-800">
+          hey there, <strong className="font-semibold">{session?.name}</strong>
+        </h1>
+        <button
+          className="rounded-md bg-violet-200 p-1.5 px-4 text-center font-medium text-violet-900 transition-colors duration-75 hover:bg-violet-200/80 focus:bg-violet-200/40"
+          onClick={open}
+        >
+          set times
+        </button>
+        <button
+          className="rounded-md bg-emerald-100 p-1.5 px-10 text-center font-medium text-emerald-900 transition-colors duration-75 hover:bg-emerald-200/80 focus:bg-emerald-200/40"
+          onClick={handleSubmit}
+        >
+          submit
+        </button>
+      </div>
       {DatePicker}
     </div>
   );

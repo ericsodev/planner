@@ -1,16 +1,17 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { string, z } from "zod";
 import { prisma } from "../../db/client";
 import bcyrpt from "bcrypt";
 
 import { router, publicProcedure } from "../trpc";
+import { generateJWT, verifyJWT } from "@/utils/jwt";
 
 export const plansRouter = router({
   getBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
     .query(async ({ input }) => {
       try {
-        return await prisma.plan.findFirstOrThrow({
+        return await prisma.plan.findFirst({
           where: {
             slug: input.slug,
           },
@@ -21,6 +22,7 @@ export const plansRouter = router({
             startDate: true,
             endDate: true,
             createdAt: true,
+            updatedAt: true,
             member: {
               select: {
                 availableTimes: true,
@@ -31,7 +33,7 @@ export const plansRouter = router({
           },
         });
       } catch (e) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
     }),
   getById: publicProcedure
@@ -91,7 +93,7 @@ export const plansRouter = router({
       if (input.password) {
         password = await bcyrpt.hash(input.password, 10);
       }
-      return await prisma.member.create({
+      const member = await prisma.member.create({
         data: {
           planId: input.planId,
           availableTimes: input.dates,
@@ -99,28 +101,22 @@ export const plansRouter = router({
           password: password,
         },
       });
-      // await prisma.plan.update({
-      //   where: { id: input.planId },
-      //   data: {
-      //     member: {
-      //       create: [
-      //         {
-      //           name: input.name,
-      //           availableTimes: input.dates,
-      //           password: password,
-      //         },
-      //       ],
-      //     },
-      //   },
-      // });
+      const returnVal = {
+        id: member.id,
+        user: member.name,
+        planId: member.planId,
+        jwt: "",
+      };
+      if (input.password) returnVal.jwt = generateJWT(member.id);
+      return returnVal;
     }),
   changeAvailability: publicProcedure
     .input(
       z.object({
         planId: z.string(),
         memberId: z.string(),
-        password: z.string().optional(),
         dates: z.array(z.date()),
+        jwt: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -133,18 +129,56 @@ export const plansRouter = router({
           code: "NOT_FOUND",
         });
       }
-      let authed = true;
       if (member.password) {
-        authed = await bcyrpt.compare(input.password ?? "", member.password);
+        try {
+          verifyJWT(input.jwt);
+        } catch (e) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
       }
-      if (!authed) {
-        throw new TRPCError({ code: "UNAUTHORIZED" });
-      }
+
       await prisma.member.update({
         where: { id: input.memberId },
         data: {
           availableTimes: input.dates,
         },
       });
+    }),
+  authenticate: publicProcedure
+    .input(
+      z.object({
+        user: z.string(),
+        planId: z.string(),
+        password: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const member = await prisma.member.findFirst({
+        where: { planId: input.planId, name: input.user },
+        select: {
+          id: true,
+          name: true,
+          password: true,
+          planId: true,
+        },
+      });
+      if (!member) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!member.password && !input.password) {
+        // no password
+        return { id: member.id, user: member.name, planId: member.planId };
+      } else if (
+        member.password &&
+        (await bcyrpt.compare(input.password ?? "", member.password))
+      ) {
+        // password matches
+        return {
+          id: member.id,
+          user: member.name,
+          jwt: generateJWT(member.id),
+        };
+      } else {
+        // password does not match or user entered a password for a non-password account
+        return { error: "login_failed" };
+      }
     }),
 });

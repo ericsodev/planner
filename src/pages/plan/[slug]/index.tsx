@@ -1,14 +1,17 @@
+import NotFound from "@/components/NotFound";
 import Calendar from "@/components/calendar";
 import Error from "@/components/error";
 import Loading from "@/components/loading";
 import MembersSidebar from "@/components/membersSidebar";
+import PlanDetailsSidebar from "@/components/planDetailsSidebar";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import dayjs from "dayjs";
 import type { NextPage } from "next";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-type Plan = RouterOutputs["plans"]["getBySlug"];
+type Plan = NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 const highlightedClasses = {
   0: "bg-green-50 text-green-600 hover:bg-green-200/70 focus:bg-green-100/90",
   1: "bg-green-100 text-green-700 hover:bg-green-200/70 focus:bg-green-100/90",
@@ -37,9 +40,23 @@ const PlanPage: NextPage = () => {
   );
 
   const highlightedDates: { [key: string]: string } = {};
-  if (plan) {
-    for (const [date, percent] of Object.entries(getPercentsTotal(plan))) {
-      highlightedDates[date] = getHighlightedStyle(percent * 100);
+  if (!selectedMember) {
+    if (plan) {
+      for (const [date, percent] of Object.entries(getPercentsTotal(plan))) {
+        highlightedDates[date] = getHighlightedStyle(percent * 100);
+      }
+    }
+  } else {
+    if (plan) {
+      const reducedPlan = { ...plan };
+      reducedPlan.member = reducedPlan.member.filter(
+        (member) => member.id === selectedMember
+      );
+      for (const [date, percent] of Object.entries(
+        getPercentsTotal(reducedPlan)
+      )) {
+        highlightedDates[date] = getHighlightedStyle(percent * 100);
+      }
     }
   }
 
@@ -48,17 +65,22 @@ const PlanPage: NextPage = () => {
     <>
       {isError && <Error></Error>}
       {isLoading && <Loading></Loading>}
+      {plan === null && <NotFound></NotFound>}
       {plan && (
-        <div className="grid min-h-screen grid-cols-[1fr_3fr_1fr] gap-6 bg-slate-50 px-12 py-6">
+        <div className="grid min-h-screen grid-cols-[1fr_3fr_1fr] gap-6 bg-slate-50 px-12 py-12">
+          <Head>
+            <title>{plan.title}</title>
+          </Head>
           <MembersSidebar
             setSelectedMember={setSelectedMember}
             selectedMember={selectedMember}
             member={plan.member}
           ></MembersSidebar>
           <div className="flex flex-col gap-12">
-            <h1 className="text-center text-xl">{plan.title}</h1>
+            <h1 className="text-center text-xl text-gray-800">{plan.title}</h1>
             <Calendar highlightedDates={highlightedDates}></Calendar>
           </div>
+          <PlanDetailsSidebar plan={plan}></PlanDetailsSidebar>
         </div>
       )}
     </>
@@ -66,19 +88,19 @@ const PlanPage: NextPage = () => {
 };
 
 function getPercentsTotal(plan: Plan): { [key: string]: number } {
+  if (!plan) return {};
   if (dayjs(plan.startDate).isAfter(plan.endDate, "day")) return {};
   const availableMembers: { [key: string]: number } = {};
   const totalMembers = plan.member.length;
   let curr = dayjs(plan.startDate);
   while (!dayjs(plan.endDate).isBefore(curr, "day")) {
+    const key = curr.startOf("day").toISOString();
+    availableMembers[key] = 0;
     for (const member of plan.member) {
       for (const time of member.availableTimes) {
         if (curr.isSame(time, "day")) {
-          const key = curr.startOf("day").toISOString();
           if (availableMembers.hasOwnProperty(key)) {
             availableMembers[key]++;
-          } else {
-            availableMembers[key] = 1;
           }
         }
       }

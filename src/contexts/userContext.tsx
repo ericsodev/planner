@@ -5,6 +5,7 @@ import { useContext } from "react";
 interface Session {
   name: string;
   planId: string;
+  jwt?: string;
 }
 
 interface UserCtx {
@@ -33,6 +34,7 @@ export function SessionProvider(props: any) {
           setSession(undefined);
         },
         login: (session: Session) => {
+          console.log(session.name);
           setSession(session);
         },
       }}

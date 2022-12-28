@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Loading from "../loading";
 
+type Plan = NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 interface Props {
-  member: RouterOutputs["plans"]["getBySlug"]["member"];
+  member: Plan["member"];
   selectedMember: string | null;
   setSelectedMember: React.Dispatch<React.SetStateAction<string | null>>;
 }
@@ -25,14 +26,16 @@ export default function Sidebar({
       }}
       className="flex flex-col"
     >
-      <h1 className="mb-4 text-xl font-medium text-gray-500">members</h1>
+      <h1 className="mb-4 text-xl font-medium text-gray-500">
+        members {`(${member.length})`}
+      </h1>
       <ul className="flex flex-col gap-2">
-        {member.map((v, _) => (
+        {member.map((v) => (
           <li
-            className={`rounded-md px-4  py-1 font-medium ${
+            className={`rounded-md px-4  py-2 font-medium ${
               selectedMember === v.id
-                ? "bg-slate-200/80 text-gray-700"
-                : "bg-slate-100 text-gray-600"
+                ? "bg-slate-200/80 text-gray-700 hover:bg-slate-200 focus:bg-slate-200/60"
+                : "bg-slate-100 text-gray-600 hover:bg-slate-200/60 focus:bg-slate-200/40"
             }`}
             key={v.id}
             onClick={(e) => {
@@ -49,7 +52,7 @@ export default function Sidebar({
       {session?.name ? (
         <Link
           href={`/plan/${slug}/update`}
-          className="rounded-md bg-emerald-100 p-1.5 text-center font-medium text-emerald-900"
+          className="rounded-md bg-emerald-100 p-1.5 text-center font-medium text-emerald-900 transition-colors duration-75 hover:bg-emerald-200/80 focus:bg-emerald-200/40"
         >
           update schedule
         </Link>
@@ -57,13 +60,13 @@ export default function Sidebar({
         <div className="grid grid-cols-2 grid-rows-1 gap-4">
           <Link
             href={`/plan/${slug}/signUp`}
-            className="rounded-md bg-emerald-100 p-1.5 text-center font-medium text-emerald-900"
+            className="rounded-md bg-emerald-100 p-1.5 text-center font-medium text-emerald-900 transition-colors duration-75 hover:bg-emerald-200/80 focus:bg-emerald-200/40"
           >
             sign up
           </Link>
           <Link
             href={`/plan/${slug}/signIn`}
-            className="rounded-md bg-emerald-100 p-1.5 text-center font-medium text-emerald-900"
+            className="rounded-md bg-emerald-100 p-1.5 text-center font-medium text-emerald-900 transition-colors duration-75 hover:bg-emerald-200/80 focus:bg-emerald-200/40"
           >
             sign in
           </Link>
