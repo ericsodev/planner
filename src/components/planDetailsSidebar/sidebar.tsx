@@ -1,7 +1,7 @@
 import type { RouterOutputs } from "@/utils/trpc";
 import dayjs from "dayjs";
 interface Props {
-  plan: RouterOutputs["plans"]["getBySlug"];
+  plan: NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 }
 export default function Sidebar({ plan }: Props): JSX.Element {
   return (

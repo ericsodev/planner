@@ -4,7 +4,7 @@ import { useState } from "react";
 import Day from "./day";
 import { Header } from "./header";
 
-type Members = RouterOutputs["plans"]["getBySlug"]["member"];
+type Members = NonNullable<RouterOutputs["plans"]["getBySlug"]>["member"];
 
 interface Props {
   highlightedDates?: { [key: string]: string };

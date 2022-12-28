@@ -2,13 +2,13 @@ import Label from "@/components/global/Form/labelField";
 import { useSession } from "@/contexts/userContext";
 import { RouterOutputs, trpc } from "@/utils/trpc";
 import { ErrorMessage, Field, Form, Formik } from "formik";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import ErrorField from "../global/Form/errorField";
 import InputField from "../global/Form/inputField";
-import Link from "next/link";
 
 interface Props {
-  plan: RouterOutputs["plans"]["getBySlug"];
+  plan: NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 }
 interface FormState {
   user: string;

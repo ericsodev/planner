@@ -1,9 +1,8 @@
-import dayjs from "dayjs";
-import type { SetStateAction } from "react";
-import { useRef, useState } from "react";
-import DayCell from "./dayCell";
-import { MdOutlineNavigateNext, MdOutlineNavigateBefore } from "react-icons/md";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import dayjs from "dayjs";
+import { useState } from "react";
+import { MdOutlineNavigateBefore, MdOutlineNavigateNext } from "react-icons/md";
+import DayCell from "./dayCell";
 
 const DOW_PREFIXES = ["S", "M", "T", "W", "T", "F", "S"];
 export default function DatePickerPopup(props: any) {

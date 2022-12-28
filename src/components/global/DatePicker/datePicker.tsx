@@ -1,5 +1,3 @@
-import type { SetStateAction } from "react";
-import { useState } from "react";
 import DatePickerPopup from "./datePickerPopup";
 
 interface DatePickerProps {
