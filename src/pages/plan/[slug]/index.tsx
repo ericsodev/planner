@@ -10,6 +10,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { IoLink } from "react-icons/io5";
 
 type Plan = NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 const highlightedClasses = {
@@ -77,7 +78,19 @@ const PlanPage: NextPage = () => {
             member={plan.member}
           ></MembersSidebar>
           <div className="flex flex-col gap-12">
-            <h1 className="text-center text-xl text-gray-800">{plan.title}</h1>
+            <div className="flex flex-row items-center justify-center gap-4">
+              <h1 className="text-center text-xl text-gray-800">
+                {plan.title}
+              </h1>
+              <button
+                onClick={() =>
+                  navigator.clipboard.writeText(window.location.toString())
+                }
+                className="rounded-md p-1.5 transition-colors duration-75 hover:bg-slate-200 focus:bg-slate-100"
+              >
+                <IoLink className="text-xl"></IoLink>
+              </button>
+            </div>
             <Calendar highlightedDates={highlightedDates}></Calendar>
           </div>
           <PlanDetailsSidebar plan={plan}></PlanDetailsSidebar>
