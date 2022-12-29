@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import ErrorField from "../global/Form/errorField";
 import InputField from "../global/Form/inputField";
+import Loading from "../loading";
 
 interface Props {
   plan: NonNullable<RouterOutputs["plans"]["getBySlug"]>;
@@ -40,6 +41,7 @@ export default function SignInForm({ plan }: Props): JSX.Element {
     });
     router.push(`/plan/${plan.slug}/update`);
   };
+  if (loginMutation.isLoading) return <Loading></Loading>;
   return (
     <div className="flex w-1/4 basis-80 flex-col justify-between gap-4 rounded-lg bg-slate-200/70 px-10 py-6">
       <Formik

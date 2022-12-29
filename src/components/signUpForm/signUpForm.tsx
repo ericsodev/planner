@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import ErrorField from "../global/Form/errorField";
 import InputField from "../global/Form/inputField";
+import Loading from "../loading";
 interface Props {
   plan: NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 }
@@ -32,9 +33,11 @@ export default function SignUpForm({ plan }: Props): JSX.Element {
       name: values.user,
       password: values.password,
     });
+
     login({ name: member.user, planId: member.planId, jwt: member.jwt });
     router.push(`/plan/${plan.slug}/update`);
   };
+  if (memberMutation.isLoading) return <Loading></Loading>;
   return (
     <div className="flex basis-80 flex-col justify-between gap-4 rounded-lg  bg-slate-200/70 px-10 py-6 lg:w-1/4 2xl:w-1/5">
       <Formik

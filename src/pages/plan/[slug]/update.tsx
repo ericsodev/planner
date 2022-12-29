@@ -1,4 +1,5 @@
 import useDatePicker from "@/components/global/DatePicker/useDatePicker";
+import Loading from "@/components/loading";
 import { useSession } from "@/contexts/userContext";
 import { trpc } from "@/utils/trpc";
 import dayjs from "dayjs";
@@ -66,7 +67,7 @@ const UpdatePage: NextPage = () => {
       }
     );
   };
-
+  if (memberMutate.isLoading) return <Loading></Loading>;
   return (
     <div className="flex h-full min-h-screen flex-col items-center justify-center gap-5 self-center bg-slate-50">
       {error && <h1>error</h1>}
