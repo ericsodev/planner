@@ -1,7 +1,11 @@
 
 # Planner
 
-Organize social gatherings easily with a unified online planner.
+Organize social gatherings easily with a unified online planner. 
+
+Currently hosted at https://planner-production.up.railway.app/. 
+
+See an existing example plan here https://planner-production.up.railway.app/plan/cbac6bb2-3b22-444a-97fa-c71b48160ac7.
 
 ## Tech Stack
 
