@@ -97,6 +97,7 @@ const PlanPage: NextPage = () => {
             </div>
             <div onClick={() => setSelectedDate(null)}>
               <Calendar
+                initialDate={plan.startDate}
                 highlightedDates={highlightedDates}
                 onClick={(date) => {
                   setSelectedDate(date);
