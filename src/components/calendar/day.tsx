@@ -12,11 +12,15 @@ export default function Day({
   return (
     <div
       tabIndex={0}
-      onClick={() => onClick(date)}
+      onClick={(e) => {
+        onClick(date);
+        e.preventDefault();
+        e.stopPropagation();
+      }}
       className={`${
         highlightedStyle ||
         "bg-slate-50 text-gray-600 hover:bg-slate-200/70 focus:bg-slate-200/40"
-      } text-md flex h-24 justify-start bg-slate-50 px-3 pt-2 align-top transition-colors duration-75 `}
+      } text-md flex h-14 justify-start bg-slate-50 px-3.5 pt-2 align-top text-sm font-medium transition-colors duration-75 md:h-16 md:text-base lg:h-24 `}
     >
       {date ? dayjs(date).date() : ""}
     </div>

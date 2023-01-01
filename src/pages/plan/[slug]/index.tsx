@@ -1,16 +1,18 @@
 import NotFound from "@/components/NotFound";
 import Calendar from "@/components/calendar";
 import Error from "@/components/error";
-import Loading from "@/components/loading";
+import Loading from "@/components/Loading";
 import MembersSidebar from "@/components/membersSidebar";
 import PlanDetailsSidebar from "@/components/planDetailsSidebar";
-import { RouterOutputs, trpc } from "@/utils/trpc";
+import { trpc } from "@/utils/trpc";
+import type { RouterOutputs } from "@/utils/trpc";
 import dayjs from "dayjs";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { IoLink } from "react-icons/io5";
+import DateDetailsSidebar from "@/components/dateDetailsSidebar";
 
 type Plan = NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 const highlightedClasses = {
@@ -26,6 +28,8 @@ const PlanPage: NextPage = () => {
   const router = useRouter();
   const { slug } = router.query;
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
   const {
     data: plan,
     isLoading,
@@ -68,7 +72,7 @@ const PlanPage: NextPage = () => {
       {isLoading && <Loading></Loading>}
       {plan === null && <NotFound></NotFound>}
       {plan && (
-        <div className="grid min-h-screen grid-cols-[1fr_3fr_1fr] gap-6 bg-slate-50 px-12 py-12">
+        <div className="grid min-h-screen grid-cols-[1fr_3fr_1fr]  gap-6 bg-slate-50 px-12 py-12 2xl:gap-12">
           <Head>
             <title>{plan.title}</title>
           </Head>
@@ -91,9 +95,22 @@ const PlanPage: NextPage = () => {
                 <IoLink className="text-xl"></IoLink>
               </button>
             </div>
-            <Calendar highlightedDates={highlightedDates}></Calendar>
+            <div onClick={() => setSelectedDate(null)}>
+              <Calendar
+                highlightedDates={highlightedDates}
+                onClick={(date) => {
+                  setSelectedDate(date);
+                }}
+              ></Calendar>
+            </div>
           </div>
-          <PlanDetailsSidebar plan={plan}></PlanDetailsSidebar>
+          <div className="flex flex-col gap-6 2xl:gap-12">
+            <PlanDetailsSidebar plan={plan}></PlanDetailsSidebar>
+            <DateDetailsSidebar
+              plan={plan}
+              selectedDate={selectedDate}
+            ></DateDetailsSidebar>
+          </div>
         </div>
       )}
     </>

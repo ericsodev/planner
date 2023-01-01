@@ -1,5 +1,6 @@
 import useDatePicker from "@/components/global/DatePicker/useDatePicker";
-import Loading from "@/components/loading";
+import Loading from "@/components/Loading";
+import Error from "@/components/error";
 import { useSession } from "@/contexts/userContext";
 import { trpc } from "@/utils/trpc";
 import dayjs from "dayjs";
@@ -7,21 +8,17 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
-/*
-Assume user has authenticated if user value is present
-*/
 const UpdatePage: NextPage = () => {
   const router = useRouter();
   const memberMutate = trpc.plans.changeAvailability.useMutation();
   const { slug } = router.query;
   const { session } = useSession();
-  const plan = trpc.plans.getBySlug.useQuery({
-    slug: typeof slug === "string" ? slug : "",
-  });
-  useEffect(() => {
-    if (!slug) router.push(`/`);
-    if (!session) router.push(`/plan/${slug}/signUp`);
-  }, [session, router, slug]);
+  const plan = trpc.plans.getBySlug.useQuery(
+    {
+      slug: typeof slug === "string" ? slug : "",
+    },
+    { enabled: typeof slug === "string" }
+  );
 
   const member = trpc.plans.getMember.useQuery(
     {
@@ -32,6 +29,16 @@ const UpdatePage: NextPage = () => {
       enabled: !!plan.data,
     }
   );
+
+  useEffect(() => {
+    if (!slug) router.push(`/`);
+    console.log(slug);
+    if (!session) router.push(`/plan/${slug}/signUp`);
+  }, [session, router, slug]);
+
+  const loading = member.isLoading || plan.isLoading;
+  const error = member.isError || plan.isError;
+
   const dateRange = plan.data
     ? generateDateRange(plan.data.startDate, plan.data.endDate)
     : [];
@@ -45,9 +52,6 @@ const UpdatePage: NextPage = () => {
     highlightedDates: dateRange,
     selectableDates: dateRange,
   });
-
-  const loading = member.isLoading || plan.isLoading;
-  const error = member.isError || plan.isError;
   const handleSubmit = () => {
     console.log(session);
     console.log(member.data);
@@ -70,8 +74,8 @@ const UpdatePage: NextPage = () => {
   if (memberMutate.isLoading) return <Loading></Loading>;
   return (
     <div className="flex h-full min-h-screen flex-col items-center justify-center gap-5 self-center bg-slate-50">
-      {error && <h1>error</h1>}
-      {loading && <h1>loading</h1>}
+      {error && <Error></Error>}
+      {loading && <Loading></Loading>}
       <div className="grid grid-cols-1 gap-4">
         <h1 className="text-center text-gray-800">
           hey there, <strong className="font-semibold">{session?.name}</strong>

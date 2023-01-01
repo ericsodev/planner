@@ -5,7 +5,7 @@ interface Props {
 }
 export default function Sidebar({ plan }: Props): JSX.Element {
   return (
-    <div className="flex flex-col">
+    <div className="flex w-full flex-col">
       <h1 className="mb-4 text-xl font-medium text-gray-500">plan details</h1>
       <ul className=" flex flex-col gap-3 text-gray-600">
         <li>

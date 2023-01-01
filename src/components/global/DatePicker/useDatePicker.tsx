@@ -18,9 +18,12 @@ export default function useDatePicker({
   selectableDates,
 }: Props) {
   const [hidden, setHidden] = useState(true);
-  const [selectedDates, setSelectedDates] = useState<Date[]>(
-    initialDates ?? [new Date()] // TODO: if multiselect, then default should be empty array
-  );
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  useEffect(() => {
+    setSelectedDates(
+      multiSelect ? initialDates ?? [] : initialDates ?? [new Date()]
+    );
+  }, [initialDates, setSelectedDates, multiSelect]);
   const ref = useRef<(dates: Date[]) => void | undefined>();
   ref.current = onChange;
   useEffect(() => {

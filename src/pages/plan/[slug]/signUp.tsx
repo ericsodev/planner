@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { trpc } from "@/utils/trpc";
 import Error from "@/components/error";
-import Loading from "@/components/loading";
+import Loading from "@/components/Loading";
 import SignUpForm from "@/components/signUpForm/signUpForm";
 import Head from "next/head";
 import { useSession } from "@/contexts/userContext";

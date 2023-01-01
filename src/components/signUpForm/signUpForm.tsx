@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import ErrorField from "../global/Form/errorField";
 import InputField from "../global/Form/inputField";
-import Loading from "../loading";
+import Loading from "../Loading";
 interface Props {
   plan: NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 }
@@ -57,7 +57,9 @@ export default function SignUpForm({ plan }: Props): JSX.Element {
             <div className="flex h-full flex-col gap-3">
               <h1 className="mb-4 text-2xl font-medium text-gray-600">
                 sign up for{" "}
-                <strong className="font-semibold">{plan.title}</strong>
+                <Link href={`/plan/${plan.slug}`}>
+                  <strong className="font-semibold">{plan.title}</strong>
+                </Link>
               </h1>
               <Label text={"username"}></Label>
               <Field

@@ -13,6 +13,7 @@
   "dependencies": {
     "@fontsource/inter": "^4.5.14",
     "@formkit/auto-animate": "^1.0.0-beta.5",
+    "@headlessui/react": "^1.7.7",
     "@prisma/client": "^4.5.0",
     "@tanstack/react-query": "^4.16.0",
     "@trpc/client": "^10.0.0",

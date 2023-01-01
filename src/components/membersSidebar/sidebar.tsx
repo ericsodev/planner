@@ -2,7 +2,7 @@ import type { RouterOutputs } from "@/utils/trpc";
 import { useSession } from "@/contexts/userContext";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import Loading from "../loading";
+import Loading from "../Loading";
 
 type Plan = NonNullable<RouterOutputs["plans"]["getBySlug"]>;
 interface Props {
@@ -24,7 +24,7 @@ export default function Sidebar({
       onClick={() => {
         setSelectedMember(null);
       }}
-      className="flex flex-col"
+      className="flex h-full w-full flex-col"
     >
       <h1 className="mb-4 text-xl font-medium text-gray-500">
         members {`(${member.length})`}
