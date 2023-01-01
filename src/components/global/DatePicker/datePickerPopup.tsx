@@ -16,7 +16,7 @@ export default function DatePickerPopup(props: any) {
   for (let i = 0; i < dayjs(shownMonth).daysInMonth(); i++)
     dayComponents.push(
       <DayCell
-        key={`day-${i}`}
+        key={`datepicker-day-${i}`}
         date={dayjs(shownMonth)
           .set("date", i + 1)
           .toDate()}

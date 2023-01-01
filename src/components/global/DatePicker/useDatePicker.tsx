@@ -18,12 +18,9 @@ export default function useDatePicker({
   selectableDates,
 }: Props) {
   const [hidden, setHidden] = useState(true);
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
-  useEffect(() => {
-    setSelectedDates(
-      multiSelect ? initialDates ?? [] : initialDates ?? [new Date()]
-    );
-  }, [initialDates, setSelectedDates, multiSelect]);
+  const [selectedDates, setSelectedDates] = useState<Date[]>(
+    initialDates ?? []
+  );
   const ref = useRef<(dates: Date[]) => void | undefined>();
   ref.current = onChange;
   useEffect(() => {
@@ -65,6 +62,7 @@ export default function useDatePicker({
     open: () => {
       setHidden(false);
     },
+    setSelectedDates: setSelectedDates,
   };
 }
 

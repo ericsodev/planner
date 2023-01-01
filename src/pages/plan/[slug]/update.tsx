@@ -32,7 +32,6 @@ const UpdatePage: NextPage = () => {
 
   useEffect(() => {
     if (!slug) router.push(`/`);
-    console.log(slug);
     if (!session) router.push(`/plan/${slug}/signUp`);
   }, [session, router, slug]);
 
@@ -46,16 +45,19 @@ const UpdatePage: NextPage = () => {
     component: DatePicker,
     open,
     selectedDates,
+    setSelectedDates,
   } = useDatePicker({
     initialDates: member.data?.availableTimes ?? [],
     multiSelect: true,
     highlightedDates: dateRange,
     selectableDates: dateRange,
   });
+
+  useEffect(() => {
+    setSelectedDates(member.data?.availableTimes ?? []);
+  }, [setSelectedDates, member.data]);
+
   const handleSubmit = () => {
-    console.log(session);
-    console.log(member.data);
-    console.log(plan.data);
     if (!(member.data && plan.data)) return;
     memberMutate.mutate(
       {

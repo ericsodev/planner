@@ -24,7 +24,6 @@ export default function DayCell(props: DayCellProps) {
     if (!selectableDates || containsDate(selectableDates, props.date)) {
       if (toggleDate) {
         toggleDate(dayjs(props.date).endOf("day").toDate());
-        console.log("toggle");
       } else if (setDate) {
         setDate(dayjs(props.date).endOf("day").toDate());
       }
